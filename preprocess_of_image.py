@@ -1,12 +1,11 @@
 from PIL import Image, ImageEnhance
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 
 def get_parametres_from_image(img):
     img_array = np.array(img)
-    mean_brightness = np.mean(img_array)  # средняя яркость
-    std_brightness = np.std(img_array)  # отклонение от среднего
+    mean_brightness = np.mean(img_array)
+    std_brightness = np.std(img_array)
     
     return mean_brightness, std_brightness
 
@@ -42,26 +41,41 @@ def analyze_image(mean_brightness, std_brightness):
 
     return contrast_adjustment, brightness_adjustment, adjust_type
 
-def make_image(img_tmp, adjust_type=0,brightness_adjustment =1, contrast_adjustment=1):
+def adaptive_bilateral_filter(image):
+    height, width = image.shape[:2]
+    num_pixels = height * width
+
+    mean_color = np.mean(image, axis=(0, 1))
+    std_color = np.std(image, axis=(0, 1))
+    avg_std_color = np.mean(std_color)
+
+    d = max(5, min(width, height) // 10)
+    sigmaColor = int(avg_std_color * 2)
+    sigmaSpace = max(5, min(width, height) // 20)
+
+    filtered_image = cv2.bilateralFilter(image, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
+
+    return filtered_image
+
+
+def make_image(img, adjust_type=0,brightness_adjustment =1, contrast_adjustment=1):
     if adjust_type == 1:  # Изменить только яркость
-        img = ImageEnhance.Brightness(img_tmp).enhance(brightness_adjustment)
+        img = ImageEnhance.Brightness(img).enhance(brightness_adjustment)
         img.save(f'Brightness-{contrast_adjustment}.jpg')
-        return img
 
     elif adjust_type == 2:  # Изменить только контрастность
-        img = ImageEnhance.Contrast(img_tmp).enhance(contrast_adjustment)
+        img = ImageEnhance.Contrast(img).enhance(contrast_adjustment)
         img.save(f'Contrast-{contrast_adjustment}.jpg')
-        return img
 
-    elif adjust_type == 3:  # Изменить и яркость, и коValueError: image has wrong modeнтрастность
-        img_brightness = ImageEnhance.Brightness(img_tmp).enhance(brightness_adjustment)
-        img_contrast = ImageEnhance.Contrast(img_brightness).enhance(contrast_adjustment)
-        img_contrast.save(f'Contrast_and_Brightness-{contrast_adjustment}.jpg')
-        print('Измененное изображение сохранено как "Contrast_and_Brightness-{contrast_adjustment}.jpg"\n')
-        return img_contrast
-
+    elif adjust_type == 3:  # Изменить и яркость, и контрастность
+        img_brightness = ImageEnhance.Brightness(img).enhance(brightness_adjustment)
+        img = ImageEnhance.Contrast(img_brightness).enhance(contrast_adjustment)
+        img.save(f'Contrast_and_Brightness-{contrast_adjustment}.jpg')
     else:
         print("Error")
+    img = np.array(img)
+    img = adaptive_bilateral_filter(img) 
+    return img
 
 #input_image_path = r'C:\\Users\\Alise\\Documents\Проект ML\\ex1.jpg'
 input_image_path = 'templates/picture1.jpg'
@@ -83,3 +97,4 @@ contrast_adjustment, brightness_adjustment, adjust_type = analyze_image(mean_bri
 res_img = make_image(img, adjust_type=3,
                      contrast_adjustment=contrast_adjustment,
                      brightness_adjustment = brightness_adjustment)
+
