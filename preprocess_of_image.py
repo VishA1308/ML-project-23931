@@ -12,6 +12,7 @@ def get_parametres_from_image(img):
 def analyze_image(mean_brightness, std_brightness):
     flag_brightness = 0
     flag_contrast = 0
+    adjust_type = 0 # tmp thing
     
     if mean_brightness < 100:
         brightness_adjustment = 2  
@@ -24,7 +25,7 @@ def analyze_image(mean_brightness, std_brightness):
     else:
         brightness_adjustment = 1
         
-    
+
     if std_brightness < 50:
         contrast_adjustment = 2  
         adjust_type = 2
@@ -43,14 +44,16 @@ def analyze_image(mean_brightness, std_brightness):
 
 def adaptive_bilateral_filter(image):
     height, width = image.shape[:2]
-    num_pixels = height * width
+    # num_pixels = height * width
 
-    mean_color = np.mean(image, axis=(0, 1))
-    std_color = np.std(image, axis=(0, 1))
-    avg_std_color = np.mean(std_color)
+    # mean_color = np.mean(image, axis=(0, 1))
+    # std_color = np.std(image, axis=(0, 1))
+    # avg_std_color = np.mean(std_color)
+
+    _, avg_std_color = get_parametres_from_image(image)
 
     d = max(5, min(width, height) // 10)
-    sigmaColor = int(avg_std_color * 2)
+    sigmaColor = int(avg_std_color)
     sigmaSpace = max(5, min(width, height) // 20)
 
     filtered_image = cv2.bilateralFilter(image, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
@@ -58,43 +61,51 @@ def adaptive_bilateral_filter(image):
     return filtered_image
 
 
-def make_image(img, adjust_type=0,brightness_adjustment =1, contrast_adjustment=1):
+def make_image(img):
+    '''
+    Preprocesses the given image and saves the result
+    '''
+
+    mean_brightness, std_brightness = get_parametres_from_image(img)    
+    contrast_adjustment, brightness_adjustment, adjust_type = analyze_image(mean_brightness, std_brightness)
+
     if adjust_type == 1:  # Изменить только яркость
         img = ImageEnhance.Brightness(img).enhance(brightness_adjustment)
-        img.save(f'Brightness-{contrast_adjustment}.jpg')
+        # img.save(f'Brightness-{contrast_adjustment}.jpg')
 
     elif adjust_type == 2:  # Изменить только контрастность
         img = ImageEnhance.Contrast(img).enhance(contrast_adjustment)
-        img.save(f'Contrast-{contrast_adjustment}.jpg')
+        # img.save(f'Contrast-{contrast_adjustment}.jpg')
 
     elif adjust_type == 3:  # Изменить и яркость, и контрастность
         img_brightness = ImageEnhance.Brightness(img).enhance(brightness_adjustment)
         img = ImageEnhance.Contrast(img_brightness).enhance(contrast_adjustment)
-        img.save(f'Contrast_and_Brightness-{contrast_adjustment}.jpg')
+        # img.save(f'Contrast_and_Brightness-{contrast_adjustment}.jpg')
+
     else:
-        print("Error")
-    img = np.array(img)
-    img = adaptive_bilateral_filter(img) 
+        print("Error") # why error? why not "nothing to change"?
+    
+    # img = np.array(img)
+    # img = adaptive_bilateral_filter(img)
+    # img = Image.fromarray(img)
+    # img.save('result.png')
+
     return img
 
-#input_image_path = r'C:\\Users\\Alise\\Documents\Проект ML\\ex1.jpg'
-input_image_path = 'templates/picture1.jpg'
 
-image_orig = Image.open(input_image_path)
-image_orig.save('original_image.jpg')
-print('Оригинальное изображение сохранено как "original_image.jpg"\n')
+# #input_image_path = r'C:\\Users\\Alise\\Documents\Проект ML\\ex1.jpg'
+# input_image_path = 'templates/noisy_img.jpg'
 
-image_path = input_image_path
-image_cv2 = cv2.imread(image_path)
-gray_image = cv2.cvtColor(image_cv2, cv2.COLOR_BGR2GRAY)
-img = Image.fromarray(gray_image)
+# image_orig = Image.open(input_image_path)
+# # image_orig.save('original_image.jpg')
+# # print('Оригинальное изображение сохранено как "original_image.jpg"\n')
 
-mean_brightness, std_brightness = get_parametres_from_image(img)
-print(f"Средняя яркость: {mean_brightness}, Стандартное отклонение яркости: {std_brightness}\n")
+# image_path = input_image_path
+# image_cv2 = cv2.imread(image_path)
+# gray_image = cv2.cvtColor(image_cv2, cv2.COLOR_BGR2GRAY)
+# img = Image.fromarray(gray_image)
 
-contrast_adjustment, brightness_adjustment, adjust_type = analyze_image(mean_brightness, std_brightness)
+# mean_brightness, std_brightness = get_parametres_from_image(img)
+# print(f"Средняя яркость: {mean_brightness}, Стандартное отклонение яркости: {std_brightness}\n")
 
-res_img = make_image(img, adjust_type=3,
-                     contrast_adjustment=contrast_adjustment,
-                     brightness_adjustment = brightness_adjustment)
-
+# res_img = make_image(img)

@@ -4,7 +4,10 @@ from nltk.tokenize import word_tokenize
 import re
 
 
-#text = "Это пример текс""та 1204 "" @@@  4 4u, в котором есть слова, не имеющие смысла."
+with open('text.txt', 'r') as fin:
+    text = fin.readlines()
+    text = ' '.join(text)
+
 text = re.sub(r'[^а-яА-ЯёЁ0-9s]', ' ', text)
 
 
