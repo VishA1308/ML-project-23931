@@ -4,18 +4,21 @@ from nltk.tokenize import word_tokenize
 import re
 
 
-#text = "Это пример текс""та 1204 "" @@@  4 4u, в котором есть слова, не имеющие смысла."
-text = re.sub(r'[^а-яА-ЯёЁ0-9s]', ' ', text)
+def filter_text(text):
+  
+    # Удаляем все символы, кроме букв русского алфавита и цифр
+    text = re.sub(r'[^а-яА-ЯёЁ0-9s]', ' ', text)
+    words = word_tokenize(text, language='russian')
+    
+    stop_words = set(stopwords.words('russian'))
+    
+    # Фильтруем слова, исключая стоп-слова
+    filtered_words = [word for word in words if word.lower() not in stop_words]
+    filtered_text = ' '.join(filtered_words)
+    
+    return filtered_text
 
-
-words = word_tokenize(text, language='russian')
-
-stop_words = set(stopwords.words('russian'))
-#print(stop_words)
-
-
-filtered_words = [word for word in words if word.lower() not in stop_words]
-
-# Результат
-filtered_text = ' '.join(filtered_words)
-print(filtered_text)
+# Пример использования функции
+text = "Это пример текста 1204 @@@ 4 4u, в котором есть слова, не имеющие смысла."
+filtered_result = filter_text(text)
+print(filtered_result)
