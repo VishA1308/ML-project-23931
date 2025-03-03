@@ -5,3 +5,4 @@ original_image.jpg
 tmp.py
 OCR_modes_tesseract.png
 PSM_modes_tesseract.png
+tesseract_boxes.py
