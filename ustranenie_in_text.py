@@ -18,7 +18,9 @@ def filter_text(text):
     
     return filtered_text
 
+'''
 # Пример использования функции
 text = "Это пример текста 1204 @@@ 4 4u, в котором есть слова, не имеющие смысла."
 filtered_result = filter_text(text)
 print(filtered_result)
+'''
