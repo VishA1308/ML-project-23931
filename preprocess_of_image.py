@@ -79,15 +79,15 @@ def make_image(img, adjust_type=0, brightness=1, contrast=1):
     img = adaptive_bilateral_filter(img) 
     return img
 
-
 '''
 files = os.listdir('templates/')
 os.makedirs('res/', exist_ok=True)
 
 for file in files:
     image = cv2.imread(f'templates/{file}', cv2.IMREAD_GRAYSCALE)
-    img_mean, img_std = get_parameters_from_image(image)
+    img_mean, img_std = get_parametres(image)
     contrast, brightness, adjust_type = analyze_image(img_mean, img_std)
+    image = Image.fromarray(image)
     res_img = make_image(image, adjust_type=adjust_type, contrast=contrast, brightness=brightness)
     cv2.imwrite(f'res/{file}', res_img)
 '''
