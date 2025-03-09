@@ -4,7 +4,7 @@ from nltk.tokenize import word_tokenize
 import re
 
 
-def filter_text(text):
+def filter_text(text: str) -> str:
   
     # Удаляем все символы, кроме букв русского алфавита и цифр
     text = re.sub(r'[^а-яА-ЯёЁ0-9s]', ' ', text)
