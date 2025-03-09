@@ -4,6 +4,7 @@ import cv2
 import os
 
 def get_parametres(img):
+# Get standart deviation and mean of image
     img = np.array(img)
     img_mean = np.mean(img)
     img_std = np.std(img)
@@ -11,17 +12,21 @@ def get_parametres(img):
     return img_mean, img_std
 
 def calculate_temp(contrast):
+# Calculate value for blur
     return (1 + contrast * 5 / 130)
 
 def adaptive_bilateral_filter(image):
+    # Find parametres for blur: shape, std, mean, blur-value, d, sigmaColor, sigmaSpace
     height, width = image.shape[:2]
     std_color = np.std(image, axis=(0, 1))
-    avg_std_color = np.mean(std_color)
+    avg_std_color, contrast = np.mean(std_color)
     contrast = np.std(image)
     temp = calculate_temp(contrast)
     d = int(max(5, min(width, height) // 10) / temp)
     sigmaColor = int(max(10, int(avg_std_color * 2)) / temp)
     sigmaSpace = int(max(5, min(width, height) // 20) / temp)
+
+    # Apply the filter 
     filtered_image = cv2.bilateralFilter(image, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     return filtered_image
 
