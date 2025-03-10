@@ -7,7 +7,7 @@ from preprocess_of_image import make_image, analyze_image, get_parametres
 def get_text(image_path: str) -> str:
     """
     Recognises text on the image and returns a result string.
-    
+
     image_text - path to the image in string format.
     """ 
     image = cv2.imread(image_path, 0) # read image in gray-scale
@@ -23,6 +23,7 @@ def get_text(image_path: str) -> str:
                                  contr_adj)
     
     # Implementing pyteseract to recognise text
+    # --psm 6 - assume a single uniform block of text
     string = pytesseract.image_to_string(processed_image, 
                                          lang='rus+eng',
                                          config='--psm 6')
