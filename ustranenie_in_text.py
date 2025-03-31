@@ -3,7 +3,6 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import re
 
-
 def filter_text(text: str) -> str:
   
     # Удаляем все символы, кроме букв русского алфавита и цифр
