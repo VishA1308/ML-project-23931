@@ -19,7 +19,7 @@ def adaptive_bilateral_filter(image):
     # Find parametres for blur: shape, std, mean, blur-value, d, sigmaColor, sigmaSpace
     height, width = image.shape[:2]
     std_color = np.std(image, axis=(0, 1))
-    avg_std_color, contrast = np.mean(std_color)
+    avg_std_color = np.mean(std_color)
     contrast = np.std(image)
     temp = calculate_temp(contrast)
     d = int(max(5, min(width, height) // 10) / temp)
@@ -88,11 +88,12 @@ def make_image(img, adjust_type=0, brightness=1, contrast=1):
 files = os.listdir('templates/')
 os.makedirs('res/', exist_ok=True)
 
-for file in files:
-    image = cv2.imread(f'templates/{file}', cv2.IMREAD_GRAYSCALE)
-    img_mean, img_std = get_parametres(image)
-    contrast, brightness, adjust_type = analyze_image(img_mean, img_std)
-    image = Image.fromarray(image)
-    res_img = make_image(image, adjust_type=adjust_type, contrast=contrast, brightness=brightness)
-    cv2.imwrite(f'res/{file}', res_img)
+for filename in files:
+    if filename.endswith(('.png', '.jpg', '.jpeg')):
+        image = cv2.imread(f'templates/{filename}', cv2.IMREAD_GRAYSCALE)
+        img_mean, img_std = get_parametres(image)
+        contrast, brightness, adjust_type = analyze_image(img_mean, img_std)
+        image = Image.fromarray(image)
+        res_img = make_image(image, adjust_type=adjust_type, contrast=contrast, brightness=brightness)
+        cv2.imwrite(f'res/{os.path.splitext(filename)[0]}.png', res_img)
 '''
