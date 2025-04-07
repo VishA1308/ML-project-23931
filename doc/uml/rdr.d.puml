@@ -1,0 +1,205 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+!theme mono
+
+!define C_WIP brown
+!define C_FUT slategray
+!define C_OPT darkgrey
+
+skinparam {
+  linetype ortho
+}
+
+<style>
+' in progress
+.i{
+  lineColor C_WIP
+  fontColor C_WIP
+}
+' future releases
+.f{
+  lineColor C_FUT
+  fontColor C_FUT
+}
+.todo{
+  lineColor saddlebrown
+  fontColor saddlebrown
+}
+.done{
+  lineColor darkgreen
+  fontColor darkgreen
+}
+</style>
+
+!define _p <&person>
+
+hide stereotype
+
+header
+
+  | project:  | RDR                       |
+  | version:  | 0.2.0                     |
+  | date:     | 2025.03.31                |
+  | updated:  | %date("yyyy.MM.dd HH:mm") |
+
+end header
+
+title
+
+  Doctor Documents Recognizer Architecture
+
+end title
+
+folder "Demonstrator" as dem {
+
+  storage fs {
+  
+    folder inp [
+      inp
+      --
+      Input Images
+      |_ pdf
+      |_ jpg
+    ]
+    
+    folder out [
+      out
+      --
+      |_ json
+    ]
+  
+  }
+  
+  
+    
+  package "bck\n----\nBack-End" as prd {
+  
+    component nrm <<todo>> [
+      nrm
+      --
+      Normalizer
+      --
+      Converts supported 
+      input formats
+      to JPEG
+      --
+      _p Yura
+    ]
+    
+    component pre <<done>> [
+      pre
+      --
+      Preprocessor
+    ]
+    
+    component ocr <<done>> [
+      ocr
+    ]
+    
+    package nlp {
+    
+      component spt [
+        spt
+        --
+        Splitter
+      ]
+      
+      component llm
+      
+      file pmt [
+        pmt
+        --
+        Prompt Set
+      ]
+    
+    }
+    
+    component vld <<f>> [
+      vld
+      --
+      Validator
+    ]
+    
+    file shm [
+      shm
+      --
+      JSON Schema
+    ]
+    
+    storage stg [
+      stg
+      --
+      File Storage
+      |_ jpg
+      |_ ocr-out  txt (non-structured)
+    ]
+    
+    component be_api [
+      be_api
+      --
+      API
+    ]
+    
+    component ppl [
+      ppl
+      --
+      Pipeline
+      --
+      Includes 
+      - run automation
+      - deployment
+    ]
+    
+    be_api -- ppl
+    
+    ppl -- pre : 2
+    ppl -- nrm : 4
+    ppl -- ocr : 6
+    ppl -- nlp : 8
+    ppl -r- vld <<f>> : 10
+    
+    stg -- ppl : 3, 5, 7, 9
+    
+    vld -u- shm <<f>>
+  
+  }
+
+}
+
+package "dev\n----\nDev Dependencies" as dev {
+
+  package bmk_ocr <<todo>> [
+    bmk_ocr
+    --
+    Benchmark OCR
+    |_ test set
+      |_ cases:
+        |_ inp
+        |_ expected
+    |_ runner
+    |_ metric set
+    |_ dashboard
+  ]
+  
+  package bmk_nlp <<todo>> [
+    bmk_nlp
+    --
+    Benchmark NLP
+    |_ test set
+      |_ cases:
+        |_ inp
+        |_ expected
+    |_ runner
+    |_ metric set
+    |_ dashboard
+  ]
+  
+
+}
+
+ppl ----> inp : 1
+ppl ----> out : 9
+
+
+@enduml

@@ -1,0 +1,54 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+!theme mono
+
+title
+
+  Doctor Documents Recognizer SDL
+
+end title
+
+start
+
+  split 
+    :Images Folder Path<
+  split again
+    :Output Path<
+  end split
+  
+  repeat
+  
+    :Image File
+    |_ JPG
+    |_ PDF<
+    
+    :Normalize
+    |_ Convert if not JPEG
+        and supported (PDF);
+        
+    :PNG>
+    
+    :Preprocess;
+    
+    :PNG>
+
+    :OCR;
+    
+    :text>
+    
+    :nlp;
+    
+    :JSON>
+    
+    :Validate by schema;
+        
+    :Output JSON>
+    
+    
+  repeat while (all images processed?) is (no)
+
+
+stop
+
+@enduml
