@@ -34,5 +34,5 @@ print("word error - ", word_error)
 character_error = cer(ground_truth_text, predicted_text)
 print("character error - ", character_error)
 
-math_error = mer(ground_truth_text, predicted_text)
-print("math error - ", math_error)
+matсh_error = mer(ground_truth_text, predicted_text)
+print("match error - ", matсh_error)
