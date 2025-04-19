@@ -136,47 +136,64 @@ def needs_processing(image_path):
 
 def process_image_with_shum(image_path, output_path):
 
-    img = Image.open(image_path)
-    
-    
-    bw_img = img.convert('L')
+    brightness, contrast = needs_processing(image_path)
+        
+    if (contrast == 1 or contrast == 1):
+        
+        img = Image.open(image_path)
+        bw_img = img.convert('L')
 
-    img_array = np.array(bw_img)
+        
+        if (brightness == 1):
+            print("Нужна обработка яркости")
+            img_array = np.array(bw_img)
+            mean_brightness = np.mean(img_array)
+            
+            if mean_brightness < 50:
+                brightness_adjustment = 1 + (50 - mean_brightness) / 100  # Увеличиваем яркость
+                
+            elif mean_brightness > 100:
+                brightness_adjustment = 1 - (mean_brightness - 100) / 100  # Уменьшаем яркость
+            else:
+                brightness_adjustment = 1
+                
+            enhancer = ImageEnhance.Brightness(bw_img)
+            bw_img = enhancer.enhance(brightness_adjustment)
 
-    # Вычисляем среднее значение яркости
-    mean_brightness = np.mean(img_array)
+        print("Нужна обработка контрастности")
+        
+        img_array = np.array(bw_img)
 
-    # Корректировка яркости
-    if mean_brightness < 100:
-        brightness_adjustment = 1 + (100 - mean_brightness) / 100  # Увеличиваем яркость
-    elif mean_brightness > 150:
-        brightness_adjustment = 1 - (mean_brightness - 150) / 100  # Уменьшаем яркость
-    else:
-        brightness_adjustment = 1  # Без изменений
+        # Находим максимальное значение пикселей 
+        max_value = np.max(img_array[img_array > 0])
 
-    # Обработка яркости
-    enhancer = ImageEnhance.Brightness(bw_img)
-    bw_img = enhancer.enhance(brightness_adjustment)  # Изменяем яркость
+        new_img_array = np.zeros_like(img_array)
 
-    img_array = np.array(bw_img)
-
-    # Находим максимальное значение пикселей 
-    max_value = np.max(img_array[img_array > 0])
-
-    new_img_array = np.zeros_like(img_array)
-
-    # Приводим значения к диапазону [0, max_value]
-    if max_value > 0:  
-        new_img_array[img_array > 0] = (img_array[img_array > 0] / max_value) * max_value
+        # Приводим значения к диапазону [0, max_value]
+        if max_value > 0:  
+           new_img_array[img_array > 0] = (img_array[img_array > 0] / max_value) * max_value
       
-    new_img_array = new_img_array.astype(np.uint8)
+        new_img_array = new_img_array.astype(np.uint8)
 
     
-    result_img = Image.fromarray(new_img_array)
-    result_img_2 = np.array(result_img)
-    result_img.save(output_path)
+        result_img = Image.fromarray(new_img_array)
+
+        result_img_2 = np.array(result_img)
+        result_img.save(output_path)
+        return result_img_2
     
-    return result_img_2
+    else:
+        
+        print("Не нужна обработка")
+        img = Image.open(image_path)
+        bw_img = img.convert('L')
+
+        img_array = np.array(bw_img)
+        result_img = Image.fromarray(img_array)
+
+        result_img_2 = np.array(result_img)
+        result_img.save(output_path)
+        return result_img_2
 
 
 def display_images(original, processed, without_shum):
