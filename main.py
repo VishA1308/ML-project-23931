@@ -1,30 +1,27 @@
 from tesseract_test import get_text
+from tesseract_test import get_text_with_shum
 from ustranenie_in_text import filter_text
+from converter_pdf import convert_to_png
+import os
 
-image_path = 'templates/esenin.jpg'
+image_path = r'C:\\Project ML\\test main\\image'  
+output_directory = r'C:\\Project ML\\test main\\img_png' 
 
-result_text = get_text(image_path) # processing of image, string in result
 
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
+convert_to_png(image_path, output_directory)
 
-image_path = 'templates/vitD.jpg'
+# Обработка изображений в выходной директории
+for image in os.listdir(output_directory):
+    # Формируем полный путь к изображению
+    image_full_path = os.path.join(output_directory, image)
+    
+    # Проверяем, что файл является изображением
+    if image.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+        result_text = get_text(image_full_path)  # обработка изображения
+        result_text_with_shum = get_text_with_shum(image_full_path)  # обработка изображения с шумом
 
-result_text = get_text(image_path) # processing of image, string in result
-
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
-
-image_path = 'templates/hello_world.jpg'
-
-result_text = get_text(image_path) # processing of image, string in result
-
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
-
-image_path = 'templates/italic.jpg'
-
-result_text = get_text(image_path) # processing of image, string in result
-
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
+        print(result_text)
+        print(filter_text(result_text))
+        print('\n')
+        print(result_text_with_shum)
+        print(filter_text(result_text_with_shum))

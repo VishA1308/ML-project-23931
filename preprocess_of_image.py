@@ -1,10 +1,9 @@
 from PIL import Image, ImageEnhance
 import numpy as np
+import matplotlib.pyplot as plt
 import cv2
-import os
 
 def get_parametres(img):
-# Get standart deviation and mean of image
     img = np.array(img)
     img_mean = np.mean(img)
     img_std = np.std(img)
@@ -12,11 +11,9 @@ def get_parametres(img):
     return img_mean, img_std
 
 def calculate_temp(contrast):
-# Calculate value for blur
     return (1 + contrast * 5 / 130)
 
 def adaptive_bilateral_filter(image):
-    # Find parametres for blur: shape, std, mean, blur-value, d, sigmaColor, sigmaSpace
     height, width = image.shape[:2]
     std_color = np.std(image, axis=(0, 1))
     avg_std_color = np.mean(std_color)
@@ -25,75 +22,185 @@ def adaptive_bilateral_filter(image):
     d = int(max(5, min(width, height) // 10) / temp)
     sigmaColor = int(max(10, int(avg_std_color * 2)) / temp)
     sigmaSpace = int(max(5, min(width, height) // 20) / temp)
-
-    # Apply the filter 
     filtered_image = cv2.bilateralFilter(image, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
     return filtered_image
 
-def analyze_image(mean_brightness, std_brightness):
-    flag_brightness = 0
-    flag_contrast = 0
+
+def process_image(image_path, output_path):
+
+    brightness, contrast = needs_processing(image_path)
+        
     
+    
+    if (contrast == 1 or contrast == 1):
+        
+        img = Image.open(image_path)
+        bw_img = img.convert('L')
+
+        
+        if (brightness == 1):
+            print("Нужна обработка яркости")
+            img_array = np.array(bw_img)
+            mean_brightness = np.mean(img_array)
+            
+            if mean_brightness < 50:
+                brightness_adjustment = 1 + (50 - mean_brightness) / 100  # Увеличиваем яркость
+                
+            elif mean_brightness > 100:
+                brightness_adjustment = 1 - (mean_brightness - 100) / 100  # Уменьшаем яркость
+            else:
+                brightness_adjustment = 1
+                
+            enhancer = ImageEnhance.Brightness(bw_img)
+            bw_img = enhancer.enhance(brightness_adjustment)
+
+        print("Нужна обработка контрастности")
+        
+        img_array = np.array(bw_img)
+
+        # Находим максимальное значение пикселей 
+        max_value = np.max(img_array[img_array > 0])
+
+        new_img_array = np.zeros_like(img_array)
+
+        # Приводим значения к диапазону [0, max_value]
+        if max_value > 0:  
+           new_img_array[img_array > 0] = (img_array[img_array > 0] / max_value) * max_value
+      
+        new_img_array = new_img_array.astype(np.uint8)
+
+    
+        result_img = Image.fromarray(new_img_array)
+
+        result_img_2 = np.array(result_img)
+        result_img_2 = adaptive_bilateral_filter(result_img_2)
+        result_img.save(output_path)
+
+        display_images(img, result_img, result_img_2)
+        return result_img_2
+    
+    else:
+        
+        print("Не нужна обработка")
+        img = Image.open(image_path)
+        bw_img = img.convert('L')
+
+        img_array = np.array(bw_img)
+        result_img = Image.fromarray(img_array)
+
+        result_img_2 = np.array(result_img)
+        result_img_2 = adaptive_bilateral_filter(result_img_2)
+        result_img.save(output_path)
+
+        display_images(img, result_img, result_img_2)
+        return result_img_2
+    
+
+
+
+
+def needs_processing(image_path):
+    brightness = 0
+    contrast = 0
+    img = Image.open(image_path)
+    bw_img = img.convert('L')  
+    img_array = np.array(bw_img)
+
+    # Вычисляем среднее значение яркости и стандартное отклонение
+    mean_brightness = np.mean(img_array)
+    std_brightness = np.std(img_array)
+
+    # Условия для определения необходимости обработки по яркости
+    if mean_brightness < 50 or mean_brightness > 150 or std_brightness < 20:
+        brightness = 1
+
+    # Вычисляем гистограмму
+    hist, _ = np.histogram(img_array.flatten(), bins=256, range=[0, 256])
+
+    # Находим минимальное ненулевое значение и максимальное значение в гистограмме
+    min_val = np.min(hist[hist > 0])
+    max_val = np.max(hist)
+
+    # Проверяем условия для необходимости обработки по гистограмме
+    contrast_threshold_hist = 0.1 * max_val  
+    if min_val < contrast_threshold_hist:
+        contrast = 1
+
+
+    return brightness, contrast
+
+
+
+
+
+
+def process_image_with_shum(image_path, output_path):
+
+    img = Image.open(image_path)
+    
+    
+    bw_img = img.convert('L')
+
+    img_array = np.array(bw_img)
+
+    # Вычисляем среднее значение яркости
+    mean_brightness = np.mean(img_array)
+
     # Корректировка яркости
     if mean_brightness < 100:
-        brightness_adjustment = 1 + (50 - mean_brightness) / 100  # Увеличиваем яркость
-        flag_brightness = 1
-    elif mean_brightness > 250:
-        brightness_adjustment = 1 - (mean_brightness - 250) / 100  # Уменьшаем яркость
-        flag_brightness = 1
+        brightness_adjustment = 1 + (100 - mean_brightness) / 100  # Увеличиваем яркость
+    elif mean_brightness > 150:
+        brightness_adjustment = 1 - (mean_brightness - 150) / 100  # Уменьшаем яркость
     else:
-        brightness_adjustment = 1
-        
-    # Корректировка контрастности
-    if std_brightness < 50:
-        contrast_adjustment = 1 + (50 - std_brightness) / 100  # Увеличиваем контрастность
-        flag_contrast = 1
-    elif std_brightness > 150:
-        contrast_adjustment = 1 - (std_brightness - 150) / 100  # Уменьшаем контрастность
-        flag_contrast = 1
-    else:
-        contrast_adjustment = 1
+        brightness_adjustment = 1  # Без изменений
 
-    adjust_type = 0
-    if flag_contrast and flag_brightness:
-        adjust_type = 3
-    elif flag_brightness:
-        adjust_type = 1
-    elif flag_contrast:
-        adjust_type = 2
+    # Обработка яркости
+    enhancer = ImageEnhance.Brightness(bw_img)
+    bw_img = enhancer.enhance(brightness_adjustment)  # Изменяем яркость
 
-    return contrast_adjustment, brightness_adjustment, adjust_type
+    img_array = np.array(bw_img)
 
-def make_image(img, adjust_type=0, brightness=1, contrast=1):
-    brightness = max(0.5, min(brightness, 1.5))
-    contrast = max(0.5, min(contrast, 1.5))
+    # Находим максимальное значение пикселей 
+    max_value = np.max(img_array[img_array > 0])
 
-    if adjust_type == 1:  
-        img = ImageEnhance.Brightness(img).enhance(brightness)
+    new_img_array = np.zeros_like(img_array)
 
-    elif adjust_type == 2:  
-        img = ImageEnhance.Contrast(img).enhance(contrast)
+    # Приводим значения к диапазону [0, max_value]
+    if max_value > 0:  
+        new_img_array[img_array > 0] = (img_array[img_array > 0] / max_value) * max_value
+      
+    new_img_array = new_img_array.astype(np.uint8)
 
-    elif adjust_type == 3: 
-        img_brightness = ImageEnhance.Brightness(img).enhance(brightness)
-        img = ImageEnhance.Contrast(img_brightness).enhance(contrast)
-    else:
-        print("Изменения не нужны")
     
-    img = np.array(img)
-    img = adaptive_bilateral_filter(img) 
-    return img
+    result_img = Image.fromarray(new_img_array)
+    result_img_2 = np.array(result_img)
+    result_img.save(output_path)
+    
+    return result_img_2
 
-'''
-files = os.listdir('templates/')
-os.makedirs('res/', exist_ok=True)
 
-for filename in files:
-    if filename.endswith(('.png', '.jpg', '.jpeg')):
-        image = cv2.imread(f'templates/{filename}', cv2.IMREAD_GRAYSCALE)
-        img_mean, img_std = get_parametres(image)
-        contrast, brightness, adjust_type = analyze_image(img_mean, img_std)
-        image = Image.fromarray(image)
-        res_img = make_image(image, adjust_type=adjust_type, contrast=contrast, brightness=brightness)
-        cv2.imwrite(f'res/{os.path.splitext(filename)[0]}.png', res_img)
-'''
+def display_images(original, processed, without_shum):
+    plt.figure(figsize=(10, 5))
+    
+
+    plt.subplot(1, 3, 1)
+    plt.imshow(original, cmap='gray')
+    plt.title('Оригинальное изображение')
+    plt.axis('off')  
+
+    plt.subplot(1, 3, 2)
+    plt.imshow(processed, cmap='gray')
+    plt.title('Обработанное изображение c шумом')
+    plt.axis('off')
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(without_shum, cmap='gray')
+    plt.title('Обработанное изображение')
+    plt.axis('off')
+    
+    plt.show()
+
+
+
+
+
