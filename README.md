@@ -35,16 +35,33 @@
 # Объяснение работы кода
 
 ## main.py
-Основной файл проекта, в котором указывается путь до изображения и применяются основные функции: извлечения текста и отфильтровывания нежелательных символов из извлеченного текста.
+Основной файл проекта, в котором указывается путь до входных изображений и путь до изображений, преобразованных в png формат и применяются основные функции: извлечения текста и отфильтровывания нежелательных символов из извлеченного текста.
 ```
-result_text = get_text(image_path) # processing of image, string in result
+image_path = r'C:\\Project ML\\test main\\image'  
+output_directory = r'C:\\Project ML\\test main\\img_png' 
 
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
+
+convert_to_png(image_path, output_directory)
+
+# Обработка изображений в выходной директории
+for image in os.listdir(output_directory):
+    # Формируем полный путь к изображению
+    image_full_path = os.path.join(output_directory, image)
+    
+    # Проверяем, что файл является изображением
+    if image.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+        result_text = get_text(image_full_path)  # обработка изображения
+        result_text_with_shum = get_text_with_shum(image_full_path)  # обработка изображения с шумом
+
+        print(result_text)
+        print(filter_text(result_text))
+        print('\n')
+        print(result_text_with_shum)
+        print(filter_text(result_text_with_shum))
 ```
 
 ## tesseract_test.py
-Файл с объединением функций pytesseract и функций предобработки изображения в функции get_text.
+Файл с объединением функций pytesseract и функций предобработки изображения в функции get_text и get_text_with_shum.
 
 ## preprocess_of_image.py
 Файл, содержащий в себе функции, отвечающие за предобработку изображений.
