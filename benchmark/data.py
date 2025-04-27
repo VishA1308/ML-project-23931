@@ -90,8 +90,8 @@ def compare_files(indicators_file, data_file):
 
     return errors, results
 
-indicators_file_path = 'indicators.txt'
-data_file_path = 'data.txt'
+indicators_file_path = 'benchmark/indicators.txt'
+data_file_path = 'benchmark/data.txt'
 
 errors, results = compare_files(indicators_file_path, data_file_path)
 
