@@ -24,6 +24,4 @@ def convert_to_png(input_dir, output_dir):
                 output_file = os.path.join(output_dir, f"{os.path.basename(file_path)[:-len(file_extension)]}.png")
                 img.save(output_file, 'PNG')
 
-        else:
-            print(f"Формат файла {file_extension} не поддерживается: {file_path}")
 
