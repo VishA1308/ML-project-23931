@@ -1,30 +1,14 @@
+import json
+
 from tesseract_test import get_text
 from ustranenie_in_text import filter_text
 
-image_path = 'templates/esenin.jpg'
-
-result_text = get_text(image_path) # processing of image, string in result
-
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
-
 image_path = 'templates/vitD.jpg'
 
-result_text = get_text(image_path) # processing of image, string in result
+rec_text = get_text(image_path)
+filt_text = filter_text(rec_text)
 
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
+response_dict = {"text": filt_text}
 
-image_path = 'templates/hello_world.jpg'
-
-result_text = get_text(image_path) # processing of image, string in result
-
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
-
-image_path = 'templates/italic.jpg'
-
-result_text = get_text(image_path) # processing of image, string in result
-
-print(result_text)
-print(filter_text(result_text)) # filter text from extra symbols
+with open('response.json', 'w+') as file:
+    json.dump(response_dict, file)
