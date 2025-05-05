@@ -15,13 +15,13 @@ def get_bbox_cords(value: dict, image_shape: list) -> dict:
         'height': int(math.ceil(value['height'] / 100 * image_shape[0]))
     }
 
-def create_box_file(text: str, bbox: dict, sample_id: int, output_dir: str):
+def add_box(text: str, bbox: dict, image_name: str, output_dir: str):
     """Create a .box file with character-level bounding boxes (simplified version)"""
-    box_path = os.path.join(output_dir, f"gt{sample_id}.box")
+    box_path = os.path.join(output_dir, f"{image_name}.box")
     
     # For simplicity, we'll create one box per character spanning the whole line
     # In a real scenario, you'd want proper character-level boxes
-    with open(box_path, 'w', encoding='utf-8') as f:
+    with open(box_path, 'a', encoding='utf-8') as f:
         for i, char in enumerate(text):
             if char.strip():  # Skip whitespace characters
                 f.write(f"{char} {bbox['x']} {bbox['y']} {bbox['x'] + bbox['width']} {bbox['y'] + bbox['height']} 0\n")
@@ -29,35 +29,42 @@ def create_box_file(text: str, bbox: dict, sample_id: int, output_dir: str):
 
 def main():
     save_dir = 'converter_res'
-    ls_label_file = 'label_studio.json'
     os.makedirs(save_dir, exist_ok=True)
     
     sample_id = 0
     unique_texts = set()
-    
-    label_file = open(ls_label_file, "r")
 
-    with label_file:
-        annotations = json.load(label_file)           
-        for label_info in annotations['result']:
-            if label_info['type'] == 'textarea':
-                text = label_info['value']['text'][0]
-                image_shape = (label_info['original_width'], 
-                                label_info['original_height'])
+    annots_dir = 'annots'
+    annots = os.listdir(annots_dir)
+
+    for annot_file in annots:
+        label_file = open(os.path.join(annots_dir, annot_file), "r")
+        with label_file:
+            annotations = json.load(label_file)       
+            for label_obj in annotations:
                 
-                # Skip duplicates
-                if text in unique_texts:
-                    continue
-                unique_texts.add(text)
+                image_name = os.path.split(label_obj['data']['ocr'])[-1][:-4]                
+
+                for label_info in label_obj['annotations'][0]['result']:
+                    if label_info['type'] == 'textarea':
+                        text = label_info['value']['text'][0]
+                        image_shape = (label_info['original_width'], 
+                                        label_info['original_height'])
+                        
+                        # Skip duplicates
+                        if text in unique_texts:
+                            continue
+                        unique_texts.add(text)
+                        
+                        # Get bounding box coordinates
+                        bbox = get_bbox_cords(label_info['value'], image_shape)
+                        
+                        # Save in Tesseract format
+                        add_box(text, bbox, image_name, save_dir)
                 
-                # Get bounding box coordinates
-                bbox = get_bbox_cords(label_info['value'], image_shape)
-                
-                # Save in Tesseract format
-                create_box_file(text, bbox, sample_id, save_dir)
                 sample_id += 1
-    
-    print(f"Conversion complete. Saved {sample_id} samples to {save_dir}")
+        
+        print(f"Conversion complete. Saved {sample_id} samples to {save_dir}")
 
 
 if __name__ == "__main__":

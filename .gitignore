@@ -8,3 +8,13 @@ Contrast_and_Brightness-2.jpg
 drafts
 *_error_rate.png
 metrics.py
+train
+tesstrain
+output
+lstmf_res
+langdata_lstm
+images
+eval
+annots
+ground_truth_texts.json
+rus.lstm
