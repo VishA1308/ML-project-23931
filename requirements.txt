@@ -8,3 +8,6 @@ matplotlib
 nltk
 pdf2image
 python-multipart
+spacy
+fuzzywuzzy
+python-Levenshtein
