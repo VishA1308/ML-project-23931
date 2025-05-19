@@ -33,7 +33,7 @@
 - Результаты анализов могут быть представлены в рукописном виде или в форматах, которые не
 соответствуют стандартной структуре
 
-## project
+## Branch project
 Наиболее полная версия проекта
 
 ### benchmark
@@ -59,20 +59,20 @@
 ### ustranenie_in_text.py
 Удаление мусорных символв из текста
 
-## app
+## Branch app
 Версия для Docker
 
-## demo
+## Branch demo
 Устаревшая версия
 
-## doc
+## Branch doc
 Версия с структурой и диаграммами
 
-## gh-pages
+## Branch gh-pages
 Ветка для GitHub Pages
 
-## tesseract_learning
+## Branch tesseract_learning
 Файлы для дообучения Tesseract OCR
 
-## web_src
+## Branch web_src
 Source-файлы сайта
