@@ -36,27 +36,27 @@
 ## project
 Наиболее полная версия проекта
 
-- benchmark
+### benchmark
 Код и файлы для тестирования и оценки решений и инструментов
-- db
+### db
 Таблицы на основе медицинских справочников с названиями анализов и нормами значений
-- res
+### res
 Обработанные изображения
-- templates
+### templates
 Тестовые изображения
-- T9.py
+### T9.py
 Обработка опечаток
-- extraction.py
+### extraction.py
 Извлечение данных из текста (названия, показатели и т.д.)
-- jiwer_test.py
+### jiwer_test.py
 Вычисление метрик WER, CER, MER (библиотека jiwer)
-- main.py
+### main.py
 Основной исполняемый файл
-- preprocess_of_image.py
+### preprocess_of_image.py
 Обработка изображений (устранение шумов, коррекция контрастности, яркости)
-- tesseract_test.py
+### tesseract_test.py
 Применение pytesseract для извлечения текста
-- ustranenie_in_text.py
+### ustranenie_in_text.py
 Удаление мусорных символв из текста
 
 ## app
